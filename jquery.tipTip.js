@@ -24,6 +24,7 @@
 		var defaults = { 
 			activation: "hover",
 			keepAlive: false,
+			clickToHide: false,
 			maxWidth: "200px",
 			edgeOffset: 3,
 			defaultPosition: "bottom",
@@ -61,6 +62,7 @@
 					org_elem.removeAttr(opts.attribute); //remove original Attribute
 				}
 				var timeout = false;
+				var is_visible = false;
 				
 				if(opts.activation == "hover"){
 					org_elem.hover(function(){
@@ -83,8 +85,17 @@
 					});
 				} else if(opts.activation == "click"){
 					org_elem.click(function(){
-						active_tiptip();
-						return false;
+						if (opts.clickToHide) {
+							if (is_visible) {
+								deactive_tiptip();
+							} else {
+								active_tiptip();
+							}
+							return false;
+						} else {
+							active_tiptip();
+							return false;
+						}
 					}).hover(function(){},function(){
 						if(!opts.keepAlive){
 							deactive_tiptip();
@@ -95,9 +106,15 @@
 							deactive_tiptip();
 						});
 					}
+					if(opts.clickToHide) {
+						tiptip_holder.click(function() {
+							deactive_tiptip();
+						});
+					}
 				}
 			
 				function active_tiptip(){
+					is_visible = true;
 					opts.enter.call(this);
 					tiptip_content.html(org_title);
 					tiptip_holder.hide().removeAttr("class").css("margin","0");
@@ -181,6 +198,7 @@
 				}
 				
 				function deactive_tiptip(){
+					is_visible = false;
 					opts.exit.call(this);
 					if (timeout){ clearTimeout(timeout); }
 					tiptip_holder.fadeOut(opts.fadeOut);
